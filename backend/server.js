@@ -1,38 +1,23 @@
-require("dotenv").config()
+const app = require("./app");
+const db = require("./config/db");
+require("dotenv").config();
 
-const express = require("express");
-const cors = require("cors")
-
-const sequelize = require("./config/database");
-const loadModels = require ("./models");
-
-loadModels(sequelize);
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/api/health", (req, res) => {
-    res.json({
-        status: "ok",
-        message: "CleanSlate backend is running",
-    })
-})
-
-const PORT = process.env.PORT || 8080;
-
-async function startServer() {
+const startApp = async () => {
     try {
-        await sequelize.authenticate();
-        console.log("Postgres connection successful")
+        await db.authenticate();
+
+        console.log("Database connected successfully");
+        await db.sync();
+
+        const PORT = process.env.PORT || 3000;
 
         app.listen(PORT, () => {
-            console.log(`backend listening on port ${PORT}`)
+            console.log(`Server is running on PORT ${PORT}`);
         });
-    } catch (error) {
-        console.error("Unable to start backend:", error)
-        process.exit(1);   
+
+    } catch(err) {
+        console.log(err.message);
     }
 }
-startServer();
+
+startApp();
